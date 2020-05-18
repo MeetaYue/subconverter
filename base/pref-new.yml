@@ -2,10 +2,13 @@ common:
   api_mode: false
   api_access_token: password
   default_url: []
+  enable_insert: true
   insert_url: []
+  prepend_insert_url: true
   exclude_remarks: ["(到期|剩余流量|时间|官网|产品)"]
   include_remarks: []
   default_external_config: "" # config/example_external_config.yml
+  base_path: base
   clash_rule_base: base/all_base.tpl
   surge_rule_base: base/all_base.tpl
   surfboard_rule_base: base/all_base.tpl
@@ -33,13 +36,13 @@ userinfo:
   - {match: "^.*?流量:(?:.*?) 剩:(.*?)天$", replace: "left=$1d"}
 
 node_pref:
-  udp_flag: false
-  tcp_fast_open_flag: false
+#  udp_flag: false
+#  tcp_fast_open_flag: false
   sort_flag: false
-  skip_cert_verify_flag: false
+#  skip_cert_verify_flag: false
   filter_deprecated_nodes: false
   append_sub_userinfo: true
-  clash_use_new_field_name: false
+  clash_use_new_field_name: true
   rename_node:
 #  - {match: "\\(?((x|X)?(\\d+)(\\.?\\d+)?)((\\s?倍率?)|(x|X))\\)?", replace: "$1x"}
   - {import: snippets/rename_node.txt}
@@ -81,12 +84,29 @@ proxy_group:
   - {import: snippets/groups.txt}
 
 template:
-  template_path: "template"
+  template_path: "templates"
   globals:
   - {key: clash.http_port, value: 7890}
   - {key: clash.socks_port, value: 7891}
   - {key: clash.allow_lan, value: true}
   - {key: clash.log_level, value: info}
+  
+aliases:
+  - {uri: /v, target: /version}
+  - {uri: /clash, target: "/sub?target=clash"}
+  - {uri: /clashr, target: "/sub?target=clashr"}
+  - {uri: /surge, target: "/sub?target=surge"}
+  - {uri: /quan, target: "/sub?target=quan"}
+  - {uri: /quanx, target: "/sub?target=quanx"}
+  - {uri: /mellow, target: "/sub?target=mellow"}
+  - {uri: /surfboard, target: "/sub?target=surfboard"}
+  - {uri: /loon, target: "/sub?target=loon"}
+  - {uri: /ss, target: "/sub?target=ss"}
+  - {uri: /ssd, target: "/sub?target=ssd"}
+  - {uri: /sssub, target: "/sub?target=sssub"}
+  - {uri: /ssr, target: "/sub?target=ssr"}
+  - {uri: /v2ray, target: "/sub?target=v2ray"}
+  - {uri: /trojan, target: "/sub?target=trojan"}
 
 server:
   listen: 0.0.0.0

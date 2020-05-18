@@ -30,6 +30,7 @@ struct responseRoute
 };
 
 std::vector<responseRoute> responses;
+string_map redirect_map;
 
 static inline void buffer_cleanup(struct evbuffer *eb)
 {
@@ -55,7 +56,7 @@ static inline int process_request(const char *method_str, std::string uri, std::
 
     for(responseRoute &x : responses)
     {
-        if(strcmp(method_str, "OPTIONS") == 0 && x.method == postdata && x.path == path)
+        if(strcmp(method_str, "OPTIONS") == 0 && postdata.find(x.method) != 0 && x.path == path)
         {
             return 1;
         }
@@ -66,6 +67,21 @@ static inline int process_request(const char *method_str, std::string uri, std::
             content_type = x.content_type;
             return 0;
         }
+    }
+
+    auto iter = redirect_map.find(path);
+    if(iter != redirect_map.end())
+    {
+        return_data = iter->second;
+        if(arguments.size())
+        {
+            if(return_data.find("?") != return_data.npos)
+                return_data += "&" + arguments;
+            else
+                return_data += "?" + arguments;
+        }
+        content_type = "REDIRECT";
+        return 0;
     }
 
     return -1;
@@ -289,4 +305,14 @@ void append_response(std::string method, std::string uri, std::string content_ty
     rr.content_type = content_type;
     rr.rc = response;
     responses.emplace_back(rr);
+}
+
+void append_redirect(std::string uri, std::string target)
+{
+    redirect_map[uri] = target;
+}
+
+void reset_redirect()
+{
+    eraseElements(redirect_map);
 }

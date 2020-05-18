@@ -7,6 +7,8 @@
 
 #include <yaml-cpp/yaml.h>
 
+#include "string_hash.h"
+
 #ifdef _WIN32
 #include <unistd.h>
 #define PATH_SLASH "\\"
@@ -16,14 +18,90 @@
 #define PATH_SLASH "//"
 #endif // _WIN32
 
+#define concat(a,b) a ## b
+#define do_concat(a,b) concat(a,b)
+#define defer(x) std::shared_ptr<void> do_concat(__defer_deleter_,__LINE__) (nullptr, [&](...){x});
+
 typedef std::string::size_type string_size;
 typedef std::vector<std::string> string_array;
+typedef std::map<std::string, std::string> string_map;
 typedef const std::string &refCnstStr;
 
 static const std::string base64_chars =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     "abcdefghijklmnopqrstuvwxyz"
     "0123456789+/";
+
+class tribool
+{
+private:
+
+    int _M_VALUE = -1;
+
+public:
+
+    tribool() { clear(); }
+
+    template <typename T> tribool(const T &value) { set(value); }
+
+    tribool(const tribool &value) { *this = value; }
+
+    ~tribool() = default;
+
+    tribool& operator=(const tribool &src)
+    {
+        _M_VALUE = src._M_VALUE;
+        return *this;
+    }
+
+    template <typename T> tribool& operator=(const T &value)
+    {
+        set(value);
+        return *this;
+    }
+
+    operator bool() const { return _M_VALUE == 1; }
+
+    bool is_undef() { return _M_VALUE == -1; }
+
+    template <typename T> void define(const T &value)
+    {
+        if(_M_VALUE == -1)
+            set(value);
+    }
+
+    bool get(const bool &def_value = false)
+    {
+        if(_M_VALUE == -1)
+            return def_value;
+        return _M_VALUE;
+    }
+
+    template <typename T> bool set(const T &value)
+    {
+        _M_VALUE = value;
+        return _M_VALUE;
+    }
+
+    bool set(const std::string &str)
+    {
+        switch(hash_(str))
+        {
+        case "true"_hash:
+            _M_VALUE = 1;
+            break;
+        case "false"_hash:
+            _M_VALUE = 0;
+            break;
+        default:
+            _M_VALUE = -1;
+            break;
+        }
+        return _M_VALUE;
+    }
+
+    void clear() { _M_VALUE = -1; }
+};
 
 std::string UrlEncode(const std::string& str);
 std::string UrlDecode(const std::string& str);
@@ -48,16 +126,17 @@ bool is_str_utf8(const std::string &data);
 std::string getFormData(const std::string &raw_data);
 
 void sleep(int interval);
-bool regValid(const std::string &target);
+bool regValid(const std::string &reg);
 bool regFind(const std::string &src, const std::string &match);
-std::string regReplace(const std::string &src, const std::string &match, const std::string &rep);
+std::string regReplace(const std::string &src, const std::string &match, const std::string &rep, bool global = true);
 bool regMatch(const std::string &src, const std::string &match);
+int regGetMatch(const std::string &src, const std::string &match, size_t group_count, ...);
 std::string regTrim(const std::string &src);
 std::string speedCalc(double speed);
 std::string getMD5(const std::string &data);
 bool isIPv4(const std::string &address);
 bool isIPv6(const std::string &address);
-void urlParse(const std::string &url, std::string &host, std::string &path, int &port, bool &isTLS);
+void urlParse(std::string &url, std::string &host, std::string &path, int &port, bool &isTLS);
 void removeUTF8BOM(std::string &data);
 int shortAssemble(unsigned short num_a, unsigned short num_b);
 void shortDisassemble(int source, unsigned short &num_a, unsigned short &num_b);

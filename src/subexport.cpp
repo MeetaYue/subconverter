@@ -9,6 +9,7 @@
 #include "socket.h"
 #include "string_hash.h"
 #include "logger.h"
+#include "templates.h"
 
 #include <algorithm>
 #include <iostream>
@@ -18,6 +19,8 @@
 #include <rapidjson/writer.h>
 #include <rapidjson/document.h>
 #include <yaml-cpp/yaml.h>
+
+#define MAX_RULES_COUNT 32768
 
 extern bool api_mode;
 extern string_array ss_ciphers, ssr_ciphers;
@@ -75,7 +78,7 @@ std::string hostnameToIPAddr(const std::string &host)
     return retAddr;
 }
 
-std::string vmessConstruct(std::string add, std::string port, std::string type, std::string id, std::string aid, std::string net, std::string cipher, std::string path, std::string host, std::string edge, std::string tls, int local_port)
+std::string vmessConstruct(std::string add, std::string port, std::string type, std::string id, std::string aid, std::string net, std::string cipher, std::string path, std::string host, std::string edge, std::string tls, tribool udp, tribool tfo, tribool scv)
 {
     if(!path.size())
         path = "/";
@@ -96,7 +99,7 @@ std::string vmessConstruct(std::string add, std::string port, std::string type, 
     writer.Key("Hostname");
     writer.String(add.data());
     writer.Key("Port");
-    writer.Int(shortAssemble((unsigned short)to_int(port), (unsigned short)local_port));
+    writer.Int(to_int(port));
     writer.Key("UserID");
     writer.String(id.data());
     writer.Key("AlterID");
@@ -128,11 +131,26 @@ std::string vmessConstruct(std::string add, std::string port, std::string type, 
     }
     writer.Key("TLSSecure");
     writer.Bool(tls == "tls");
+    if(!udp.is_undef())
+    {
+        writer.Key("EnableUDP");
+        writer.Bool(udp);
+    }
+    if(!tfo.is_undef())
+    {
+        writer.Key("EnableTFO");
+        writer.Bool(tfo);
+    }
+    if(!scv.is_undef())
+    {
+        writer.Key("AllowInsecure");
+        writer.Bool(scv);
+    }
     writer.EndObject();
     return sb.GetString();
 }
 
-std::string ssrConstruct(std::string group, std::string remarks, std::string remarks_base64, std::string server, std::string port, std::string protocol, std::string method, std::string obfs, std::string password, std::string obfsparam, std::string protoparam, int local_port, bool libev)
+std::string ssrConstruct(std::string group, std::string remarks, std::string remarks_base64, std::string server, std::string port, std::string protocol, std::string method, std::string obfs, std::string password, std::string obfsparam, std::string protoparam, bool libev, tribool udp, tribool tfo, tribool scv)
 {
     rapidjson::StringBuffer sb;
     rapidjson::Writer<rapidjson::StringBuffer> writer(sb);
@@ -144,7 +162,7 @@ std::string ssrConstruct(std::string group, std::string remarks, std::string rem
     writer.Key("Hostname");
     writer.String(server.data());
     writer.Key("Port");
-    writer.Int(shortAssemble((unsigned short)to_int(port), (unsigned short)local_port));
+    writer.Int(to_int(port));
     writer.Key("Password");
     writer.String(password.data());
     writer.Key("EncryptMethod");
@@ -157,11 +175,26 @@ std::string ssrConstruct(std::string group, std::string remarks, std::string rem
     writer.String(obfs.data());
     writer.Key("OBFSParam");
     writer.String(obfsparam.data());
+    if(!udp.is_undef())
+    {
+        writer.Key("EnableUDP");
+        writer.Bool(udp);
+    }
+    if(!tfo.is_undef())
+    {
+        writer.Key("EnableTFO");
+        writer.Bool(tfo);
+    }
+    if(!scv.is_undef())
+    {
+        writer.Key("AllowInsecure");
+        writer.Bool(scv);
+    }
     writer.EndObject();
     return sb.GetString();
 }
 
-std::string ssConstruct(std::string server, std::string port, std::string password, std::string method, std::string plugin, std::string pluginopts, std::string remarks, int local_port, bool libev)
+std::string ssConstruct(std::string server, std::string port, std::string password, std::string method, std::string plugin, std::string pluginopts, std::string remarks, bool libev, tribool udp, tribool tfo, tribool scv)
 {
     rapidjson::StringBuffer sb;
     rapidjson::Writer<rapidjson::StringBuffer> writer(sb);
@@ -173,7 +206,7 @@ std::string ssConstruct(std::string server, std::string port, std::string passwo
     writer.Key("Hostname");
     writer.String(server.data());
     writer.Key("Port");
-    writer.Int(shortAssemble((unsigned short)to_int(port), (unsigned short)local_port));
+    writer.Int(to_int(port));
     writer.Key("Password");
     writer.String(password.data());
     writer.Key("EncryptMethod");
@@ -182,11 +215,26 @@ std::string ssConstruct(std::string server, std::string port, std::string passwo
     writer.String(plugin.data());
     writer.Key("PluginOption");
     writer.String(pluginopts.data());
+    if(!udp.is_undef())
+    {
+        writer.Key("EnableUDP");
+        writer.Bool(udp);
+    }
+    if(!tfo.is_undef())
+    {
+        writer.Key("EnableTFO");
+        writer.Bool(tfo);
+    }
+    if(!scv.is_undef())
+    {
+        writer.Key("AllowInsecure");
+        writer.Bool(scv);
+    }
     writer.EndObject();
     return sb.GetString();
 }
 
-std::string socksConstruct(std::string remarks, std::string server, std::string port, std::string username, std::string password)
+std::string socksConstruct(std::string remarks, std::string server, std::string port, std::string username, std::string password, tribool udp, tribool tfo, tribool scv)
 {
     rapidjson::StringBuffer sb;
     rapidjson::Writer<rapidjson::StringBuffer> writer(sb);
@@ -203,11 +251,26 @@ std::string socksConstruct(std::string remarks, std::string server, std::string 
     writer.String(username.data());
     writer.Key("Password");
     writer.String(password.data());
+    if(!udp.is_undef())
+    {
+        writer.Key("EnableUDP");
+        writer.Bool(udp);
+    }
+    if(!tfo.is_undef())
+    {
+        writer.Key("EnableTFO");
+        writer.Bool(tfo);
+    }
+    if(!scv.is_undef())
+    {
+        writer.Key("AllowInsecure");
+        writer.Bool(scv);
+    }
     writer.EndObject();
     return sb.GetString();
 }
 
-std::string httpConstruct(std::string remarks, std::string server, std::string port, std::string username, std::string password, bool tls)
+std::string httpConstruct(std::string remarks, std::string server, std::string port, std::string username, std::string password, bool tls, tribool scv)
 {
     rapidjson::StringBuffer sb;
     rapidjson::Writer<rapidjson::StringBuffer> writer(sb);
@@ -224,11 +287,16 @@ std::string httpConstruct(std::string remarks, std::string server, std::string p
     writer.String(username.data());
     writer.Key("Password");
     writer.String(password.data());
+    if(!scv.is_undef())
+    {
+        writer.Key("AllowInsecure");
+        writer.Bool(scv);
+    }
     writer.EndObject();
     return sb.GetString();
 }
 
-std::string trojanConstruct(std::string remarks, std::string server, std::string port, std::string password, std::string host, bool tlssecure)
+std::string trojanConstruct(std::string remarks, std::string server, std::string port, std::string password, std::string host, bool tlssecure, tribool udp, tribool tfo, tribool scv)
 {
     rapidjson::StringBuffer sb;
     rapidjson::Writer<rapidjson::StringBuffer> writer(sb);
@@ -247,6 +315,59 @@ std::string trojanConstruct(std::string remarks, std::string server, std::string
     writer.String(host.data());
     writer.Key("TLSSecure");
     writer.Bool(tlssecure);
+    if(!udp.is_undef())
+    {
+        writer.Key("EnableUDP");
+        writer.Bool(udp);
+    }
+    if(!tfo.is_undef())
+    {
+        writer.Key("EnableTFO");
+        writer.Bool(tfo);
+    }
+    if(!scv.is_undef())
+    {
+        writer.Key("AllowInsecure");
+        writer.Bool(scv);
+    }
+    writer.EndObject();
+    return sb.GetString();
+}
+
+std::string snellConstruct(std::string remarks, std::string server, std::string port, std::string password, std::string obfs, std::string host, tribool udp, tribool tfo, tribool scv)
+{
+    rapidjson::StringBuffer sb;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(sb);
+    writer.StartObject();
+    writer.Key("Type");
+    writer.String("Snell");
+    writer.Key("Remark");
+    writer.String(remarks.data());
+    writer.Key("Hostname");
+    writer.String(server.data());
+    writer.Key("Port");
+    writer.Int(to_int(port));
+    writer.Key("Password");
+    writer.String(password.data());
+    writer.Key("OBFS");
+    writer.String(obfs.data());
+    writer.Key("Host");
+    writer.String(host.data());
+    if(!udp.is_undef())
+    {
+        writer.Key("EnableUDP");
+        writer.Bool(udp);
+    }
+    if(!tfo.is_undef())
+    {
+        writer.Key("EnableTFO");
+        writer.Bool(tfo);
+    }
+    if(!scv.is_undef())
+    {
+        writer.Key("AllowInsecure");
+        writer.Bool(scv);
+    }
     writer.EndObject();
     return sb.GetString();
 }
@@ -286,8 +407,9 @@ bool matchRange(std::string &range, int target)
 {
     string_array vArray = split(range, ",");
     bool match = false;
+    std::string range_begin_str, range_end_str;
     int range_begin = 0, range_end = 0;
-    const std::string reg_num = "\\d+", reg_range = "(\\d+)-(\\d+)", reg_not = "\\!(\\d+)", reg_not_range = "\\!(\\d+)-(\\d+)", reg_less = "(\\d+)-", reg_more = "(\\d+)\\+";
+    const std::string reg_num = "-?\\d+", reg_range = "(\\d+)-(\\d+)", reg_not = "\\!-?(\\d+)", reg_not_range = "\\!(\\d+)-(\\d+)", reg_less = "(\\d+)-", reg_more = "(\\d+)\\+";
     for(std::string &x : vArray)
     {
         if(regMatch(x, reg_num))
@@ -297,8 +419,13 @@ bool matchRange(std::string &range, int target)
         }
         else if(regMatch(x, reg_range))
         {
+            /*
             range_begin = to_int(regReplace(x, reg_range, "$1"), INT_MAX);
             range_end = to_int(regReplace(x, reg_range, "$2"), INT_MIN);
+            */
+            regGetMatch(x, reg_range, 3, NULL, &range_begin_str, &range_end_str);
+            range_begin = to_int(range_begin_str, INT_MAX);
+            range_end = to_int(range_end_str, INT_MIN);
             if(target >= range_begin && target <= range_end)
                 match = true;
         }
@@ -309,8 +436,13 @@ bool matchRange(std::string &range, int target)
         }
         else if(regMatch(x, reg_not_range))
         {
+            /*
             range_begin = to_int(regReplace(x, reg_range, "$1"), INT_MAX);
             range_end = to_int(regReplace(x, reg_range, "$2"), INT_MIN);
+            */
+            regGetMatch(x, reg_range, 3, NULL, &range_begin_str, &range_end_str);
+            range_begin = to_int(range_begin_str, INT_MAX);
+            range_end = to_int(range_end_str, INT_MIN);
             if(target >= range_begin && target <= range_end)
                 match = false;
         }
@@ -406,6 +538,18 @@ std::string addEmoji(std::string remark, int groupID, const string_array &emoji_
     return remark;
 }
 
+void processRemark(std::string &oldremark, std::string &newremark, string_array &remarks_list)
+{
+    newremark = oldremark;
+    int cnt = 2;
+    while(std::find(remarks_list.begin(), remarks_list.end(), newremark) != remarks_list.end())
+    {
+        newremark = oldremark + " " + std::to_string(cnt);
+        cnt++;
+    }
+    oldremark = newremark;
+}
+
 void rulesetToClash(YAML::Node &base_rule, std::vector<ruleset_content> &ruleset_content_array, bool overwrite_original_rules, bool new_field_name)
 {
     string_array allRules, vArray;
@@ -413,12 +557,15 @@ void rulesetToClash(YAML::Node &base_rule, std::vector<ruleset_content> &ruleset
     std::stringstream strStrm;
     const std::string field_name = new_field_name ? "rules" : "Rule";
     YAML::Node Rules;
+    size_t total_rules = 0;
 
     if(!overwrite_original_rules && base_rule[field_name].IsDefined())
         Rules = base_rule[field_name];
 
     for(ruleset_content &x : ruleset_content_array)
     {
+        if(total_rules > MAX_RULES_COUNT)
+            break;
         rule_group = x.rule_group;
         retrived_rules = x.rule_content.get();
         if(retrived_rules.empty())
@@ -435,6 +582,7 @@ void rulesetToClash(YAML::Node &base_rule, std::vector<ruleset_content> &ruleset
             if(std::count(strLine.begin(), strLine.end(), ',') > 2)
                 strLine = regReplace(strLine, "^(.*?,.*?)(,.*)(,.*)$", "$1$3$2");
             allRules.emplace_back(strLine);
+            total_rules++;
             continue;
         }
         char delimiter = count(retrived_rules.begin(), retrived_rules.end(), '\n') < 1 ? '\r' : '\n';
@@ -444,6 +592,8 @@ void rulesetToClash(YAML::Node &base_rule, std::vector<ruleset_content> &ruleset
         std::string::size_type lineSize;
         while(getline(strStrm, strLine, delimiter))
         {
+            if(total_rules > MAX_RULES_COUNT)
+                break;
             lineSize = strLine.size();
             /*
             if(lineSize && strLine[lineSize - 1] == '\r') //remove line break
@@ -494,6 +644,7 @@ std::string rulesetToClashStr(YAML::Node &base_rule, std::vector<ruleset_content
     std::stringstream strStrm;
     const std::string field_name = new_field_name ? "rules" : "Rule";
     std::string output_content = "\n" + field_name + ":\n";
+    size_t total_rules = 0;
 
     if(!overwrite_original_rules && base_rule[field_name].IsDefined())
     {
@@ -504,6 +655,8 @@ std::string rulesetToClashStr(YAML::Node &base_rule, std::vector<ruleset_content
 
     for(ruleset_content &x : ruleset_content_array)
     {
+        if(total_rules > MAX_RULES_COUNT)
+            break;
         rule_group = x.rule_group;
         retrived_rules = x.rule_content.get();
         if(retrived_rules.empty())
@@ -520,6 +673,7 @@ std::string rulesetToClashStr(YAML::Node &base_rule, std::vector<ruleset_content
             if(std::count(strLine.begin(), strLine.end(), ',') > 2)
                 strLine = regReplace(strLine, "^(.*?,.*?)(,.*)(,.*)$", "$1$3$2");
             output_content += " - " + strLine + "\n";
+            total_rules++;
             continue;
         }
         char delimiter = count(retrived_rules.begin(), retrived_rules.end(), '\n') < 1 ? '\r' : '\n';
@@ -529,6 +683,8 @@ std::string rulesetToClashStr(YAML::Node &base_rule, std::vector<ruleset_content
         std::string::size_type lineSize;
         while(getline(strStrm, strLine, delimiter))
         {
+            if(total_rules > MAX_RULES_COUNT)
+                break;
             lineSize = strLine.size();
             if(lineSize)
             {
@@ -543,6 +699,7 @@ std::string rulesetToClashStr(YAML::Node &base_rule, std::vector<ruleset_content
             if(std::count(strLine.begin(), strLine.end(), ',') > 2)
                 strLine = regReplace(strLine, "^(.*?,.*?)(,.*)(,.*)$", "$1$3$2");
             output_content += " - " + strLine + "\n";
+            total_rules++;
         }
     }
     return output_content;
@@ -551,8 +708,9 @@ std::string rulesetToClashStr(YAML::Node &base_rule, std::vector<ruleset_content
 void rulesetToSurge(INIReader &base_rule, std::vector<ruleset_content> &ruleset_content_array, int surge_ver, bool overwrite_original_rules, std::string remote_path_prefix)
 {
     string_array allRules;
-    std::string rule_group, rule_path, retrived_rules, strLine;
+    std::string rule_group, rule_path, retrieved_rules, strLine;
     std::stringstream strStrm;
+    size_t total_rules = 0;
 
     switch(surge_ver) //other version: -3 for Surfboard, -4 for Loon
     {
@@ -587,6 +745,8 @@ void rulesetToSurge(INIReader &base_rule, std::vector<ruleset_content> &ruleset_
 
     for(ruleset_content &x : ruleset_content_array)
     {
+        if(total_rules > MAX_RULES_COUNT)
+            break;
         rule_group = x.rule_group;
         rule_path = x.rule_path;
         if(rule_path.empty())
@@ -609,6 +769,7 @@ void rulesetToSurge(INIReader &base_rule, std::vector<ruleset_content> &ruleset_
             }
             strLine = replace_all_distinct(strLine, ",,", ",");
             allRules.emplace_back(strLine);
+            total_rules++;
             continue;
         }
         else
@@ -659,20 +820,22 @@ void rulesetToSurge(INIReader &base_rule, std::vector<ruleset_content> &ruleset_
             }
             else
                 continue;
-            retrived_rules = x.rule_content.get();
-            if(retrived_rules.empty())
+            retrieved_rules = x.rule_content.get();
+            if(retrieved_rules.empty())
             {
                 writeLog(0, "Failed to fetch ruleset or ruleset is empty: '" + x.rule_path + "'!", LOG_LEVEL_WARNING);
                 continue;
             }
 
-            char delimiter = count(retrived_rules.begin(), retrived_rules.end(), '\n') < 1 ? '\r' : '\n';
+            char delimiter = count(retrieved_rules.begin(), retrieved_rules.end(), '\n') < 1 ? '\r' : '\n';
 
             strStrm.clear();
-            strStrm<<retrived_rules;
+            strStrm<<retrieved_rules;
             std::string::size_type lineSize;
             while(getline(strStrm, strLine, delimiter))
             {
+                if(total_rules > MAX_RULES_COUNT)
+                    break;
                 lineSize = strLine.size();
                 /*
                 if(lineSize && strLine[lineSize - 1] == '\r') //remove line break
@@ -692,9 +855,12 @@ void rulesetToSurge(INIReader &base_rule, std::vector<ruleset_content> &ruleset_
                 /// remove unsupported types
                 switch(surge_ver)
                 {
-                case -1:
                 case -2:
-                    if(!std::any_of(quanx_rule_type.begin(), quanx_rule_type.end(), [strLine](std::string type){return startsWith(strLine, type);}) || startsWith(strLine, "IP-CIDR6"))
+                    if(startsWith(strLine, "IP-CIDR6"))
+                        continue;
+                    [[fallthrough]];
+                case -1:
+                    if(!std::any_of(quanx_rule_type.begin(), quanx_rule_type.end(), [strLine](std::string type){return startsWith(strLine, type);}))
                         continue;
                     break;
                 case -3:
@@ -717,6 +883,8 @@ void rulesetToSurge(INIReader &base_rule, std::vector<ruleset_content> &ruleset_
                 strLine += "," + rule_group;
                 if(surge_ver == -1 || surge_ver == -2)
                 {
+                    if(startsWith(strLine, "IP-CIDR6"))
+                        strLine.replace(0, 8, "IP6-CIDR");
                     if(std::count(strLine.begin(), strLine.end(), ',') > 2 && regReplace(strLine, rule_match_regex, "$2") == ",no-resolve")
                         strLine = regReplace(strLine, rule_match_regex, "$1$3$2");
                     else
@@ -728,6 +896,7 @@ void rulesetToSurge(INIReader &base_rule, std::vector<ruleset_content> &ruleset_
                         strLine = regReplace(strLine, rule_match_regex, "$1$3$2");
                 }
                 allRules.emplace_back(strLine);
+                total_rules++;
             }
         }
     }
@@ -762,55 +931,49 @@ void parseGroupTimes(const std::string &src, int *interval, int *tolerance, int 
 
 void groupGenerate(std::string &rule, std::vector<nodeInfo> &nodelist, std::vector<std::string> &filtered_nodelist, bool add_direct)
 {
-    std::string group;
+    std::string group, real_rule;
+    const std::string groupid_regex = R"(^!!(?:GROUPID|INSERT)=([\d\-+!,]+)(?:!!(.*))?$)", group_regex = R"(^!!(?:GROUP)=(.*?)(?:!!(.*))?$)";
     if(rule.find("[]") == 0 && add_direct)
     {
         filtered_nodelist.emplace_back(rule.substr(2));
     }
     else if(rule.find("!!GROUP=") == 0)
     {
-        if(rule.find("!!", rule.find("!!") + 2) != rule.npos)
+        regGetMatch(rule, group_regex, 3, NULL, &group, &real_rule);
+        if(real_rule.empty())
         {
-            group = rule.substr(8, rule.find("!!", rule.find("!!") + 2));
-            rule = rule.substr(rule.find("!!", rule.find("!!") + 2) + 2);
-
-            for(nodeInfo &y : nodelist)
-            {
-                if(regFind(y.group, group) && regFind(y.remarks, rule) && std::find(filtered_nodelist.begin(), filtered_nodelist.end(), y.remarks) == filtered_nodelist.end())
-                    filtered_nodelist.emplace_back(y.remarks);
-            }
-        }
-        else
-        {
-            group = rule.substr(8);
-
             for(nodeInfo &y : nodelist)
             {
                 if(regFind(y.group, group) && std::find(filtered_nodelist.begin(), filtered_nodelist.end(), y.remarks) == filtered_nodelist.end())
                     filtered_nodelist.emplace_back(y.remarks);
             }
         }
-    }
-    else if(rule.find("!!GROUPID=") == 0)
-    {
-        if(rule.find("!!", rule.find("!!") + 2) != rule.npos)
+        else
         {
-            group = rule.substr(10, rule.find("!!", rule.find("!!") + 2) - 10);
-            rule = rule.substr(rule.find("!!", rule.find("!!") + 2) + 2);
-
             for(nodeInfo &y : nodelist)
             {
-                if(matchRange(group, y.groupID) && regFind(y.remarks, rule) && std::find(filtered_nodelist.begin(), filtered_nodelist.end(), y.remarks) == filtered_nodelist.end())
+                if(regFind(y.group, group) && regFind(y.remarks, real_rule) && std::find(filtered_nodelist.begin(), filtered_nodelist.end(), y.remarks) == filtered_nodelist.end())
+                    filtered_nodelist.emplace_back(y.remarks);
+            }
+        }
+    }
+    else if(rule.find("!!GROUPID=") == 0 || rule.find("!!INSERT=") == 0)
+    {
+        int dir = rule.find("!!INSERT=") == 0 ? -1 : 1;
+        regGetMatch(rule, groupid_regex, 3, NULL, &group, &real_rule);
+        if(real_rule.empty())
+        {
+            for(nodeInfo &y : nodelist)
+            {
+                if(matchRange(group, dir * y.groupID) && std::find(filtered_nodelist.begin(), filtered_nodelist.end(), y.remarks) == filtered_nodelist.end())
                     filtered_nodelist.emplace_back(y.remarks);
             }
         }
         else
         {
-            group = rule.substr(10);
-
             for(nodeInfo &y : nodelist)
             {
-                if(matchRange(group, y.groupID) && std::find(filtered_nodelist.begin(), filtered_nodelist.end(), y.remarks) == filtered_nodelist.end())
+                if(matchRange(group, dir * y.groupID) && regFind(y.remarks, real_rule) && std::find(filtered_nodelist.begin(), filtered_nodelist.end(), y.remarks) == filtered_nodelist.end())
                     filtered_nodelist.emplace_back(y.remarks);
             }
         }
@@ -854,6 +1017,7 @@ void netchToClash(std::vector<nodeInfo> &nodes, YAML::Node &yamlnode, string_arr
     std::string plugin, pluginopts;
     std::string protocol, protoparam, obfs, obfsparam;
     std::string id, aid, transproto, faketype, host, edge, path, quicsecure, quicsecret;
+    tribool udp, scv;
     std::vector<nodeInfo> nodelist;
     bool tlssecure, replace_flag;
     string_array vArray, remarks_list, filtered_nodelist;
@@ -867,15 +1031,18 @@ void netchToClash(std::vector<nodeInfo> &nodes, YAML::Node &yamlnode, string_arr
         if(ext.append_proxy_type)
             x.remarks = "[" + type + "] " + x.remarks;
 
-        while(std::count(remarks_list.begin(), remarks_list.end(), x.remarks) > 0)
-            x.remarks += "$";
+        processRemark(x.remarks, remark, remarks_list);
 
-        remark = x.remarks;
         hostname = GetMember(json, "Hostname");
         port = GetMember(json, "Port");
         username = GetMember(json, "Username");
         password = GetMember(json, "Password");
         method = GetMember(json, "EncryptMethod");
+
+        udp = ext.udp;
+        scv = ext.skip_cert_verify;
+        udp.define(GetMember(json, "EnableUDP"));
+        scv.define(GetMember(json, "AllowInsecure"));
 
         singleproxy["name"] = remark;
         singleproxy["server"] = hostname;
@@ -927,7 +1094,7 @@ void netchToClash(std::vector<nodeInfo> &nodes, YAML::Node &yamlnode, string_arr
             singleproxy["alterId"] = stoi(aid);
             singleproxy["cipher"] = method;
             singleproxy["tls"] = tlssecure;
-            if(ext.skip_cert_verify)
+            if(scv)
                 singleproxy["skip-cert-verify"] = true;
             switch(hash_(transproto))
             {
@@ -985,7 +1152,7 @@ void netchToClash(std::vector<nodeInfo> &nodes, YAML::Node &yamlnode, string_arr
             singleproxy["password"] = password;
             if(std::all_of(password.begin(), password.end(), ::isdigit) && !password.empty())
                 singleproxy["password"].SetTag("str");
-            if(ext.skip_cert_verify)
+            if(scv)
                 singleproxy["skip-cert-verify"] = true;
             break;
         case SPEEDTEST_MESSAGE_FOUNDHTTP:
@@ -995,7 +1162,7 @@ void netchToClash(std::vector<nodeInfo> &nodes, YAML::Node &yamlnode, string_arr
             if(std::all_of(password.begin(), password.end(), ::isdigit) && !password.empty())
                 singleproxy["password"].SetTag("str");
             singleproxy["tls"] = type == "HTTPS";
-            if(ext.skip_cert_verify)
+            if(scv)
                 singleproxy["skip-cert-verify"] = true;
             break;
         case SPEEDTEST_MESSAGE_FOUNDTROJAN:
@@ -1006,14 +1173,27 @@ void netchToClash(std::vector<nodeInfo> &nodes, YAML::Node &yamlnode, string_arr
                 singleproxy["sni"] = host;
             if(std::all_of(password.begin(), password.end(), ::isdigit) && !password.empty())
                 singleproxy["password"].SetTag("str");
-            if(ext.skip_cert_verify)
+            if(scv)
                 singleproxy["skip-cert-verify"] = true;
+            break;
+        case SPEEDTEST_MESSAGE_FOUNDSNELL:
+            obfs = GetMember(json, "OBFS");
+            host = GetMember(json, "Host");
+            singleproxy["type"] = "snell";
+            singleproxy["psk"] = password;
+            if(obfs.size())
+            {
+                singleproxy["obfs-opts"]["mode"] = obfs;
+                singleproxy["obfs-opts"]["host"] = host;
+            }
+            if(std::all_of(password.begin(), password.end(), ::isdigit) && !password.empty())
+                singleproxy["password"].SetTag("str");
             break;
         default:
             continue;
         }
 
-        if(ext.udp)
+        if(udp)
             singleproxy["udp"] = true;
         singleproxy.SetStyle(YAML::EmitterStyle::Flow);
         proxies.push_back(singleproxy);
@@ -1126,6 +1306,14 @@ std::string netchToClash(std::vector<nodeInfo> &nodes, std::string &base_conf, s
     if(!ext.enable_rule_generator)
         return YAML::Dump(yamlnode);
 
+    if(ext.managed_config_prefix.size() || ext.clash_script)
+    {
+        if(yamlnode["mode"].IsDefined())
+            yamlnode["mode"] = ext.clash_script ? "Script" : "Rule";
+        renderClashScript(yamlnode, ruleset_content_array, ext.managed_config_prefix, ext.clash_script, ext.overwrite_original_rules);
+        return YAML::Dump(yamlnode);
+    }
+
     std::string output_content = rulesetToClashStr(yamlnode, ruleset_content_array, ext.overwrite_original_rules, ext.clash_new_field_name);
     output_content.insert(0, YAML::Dump(yamlnode));
 
@@ -1142,6 +1330,7 @@ std::string netchToSurge(std::vector<nodeInfo> &nodes, std::string &base_conf, s
     std::string protocol, protoparam, obfs, obfsparam;
     std::string id, aid, transproto, faketype, host, edge, path, quicsecure, quicsecret;
     std::string output_nodelist;
+    tribool udp, tfo, scv;
     std::vector<nodeInfo> nodelist;
     unsigned short local_port = 1080;
     bool tlssecure;
@@ -1171,17 +1360,22 @@ std::string netchToSurge(std::vector<nodeInfo> &nodes, std::string &base_conf, s
 
         if(ext.append_proxy_type)
             x.remarks = "[" + type + "] " + x.remarks;
-        remark = x.remarks;
 
-        while(std::count(remarks_list.begin(), remarks_list.end(), x.remarks) > 0)
-            x.remarks += "$";
+        processRemark(x.remarks, remark, remarks_list);
 
-        remark = x.remarks;
         hostname = GetMember(json, "Hostname");
         port = std::to_string((unsigned short)stoi(GetMember(json, "Port")));
         username = GetMember(json, "Username");
         password = GetMember(json, "Password");
         method = GetMember(json, "EncryptMethod");
+
+        udp = ext.udp;
+        tfo = ext.tfo;
+        scv = ext.skip_cert_verify;
+        udp.define(GetMember(json, "EnableUDP"));
+        tfo.define(GetMember(json, "EnableTFO"));
+        scv.define(GetMember(json, "AllowInsecure"));
+
         proxy.clear();
 
         switch(x.linkType)
@@ -1216,14 +1410,14 @@ std::string netchToSurge(std::vector<nodeInfo> &nodes, std::string &base_conf, s
             case "tcp"_hash:
                 break;
             case "ws"_hash:
-                proxy += ", ws=true, ws-path=" + path + ", ws-headers=Host:" + host;
+                proxy += ", ws=true, ws-path=" + path + ", sni=" + host + ", ws-headers=Host:" + host;
                 if(edge.size())
                     proxy += "|Edge:" + edge;
                 break;
             default:
                 continue;
             }
-            if(ext.skip_cert_verify)
+            if(scv)
                 proxy += ", skip-cert-verify=1";
             break;
         case SPEEDTEST_MESSAGE_FOUNDSSR:
@@ -1255,13 +1449,13 @@ std::string netchToSurge(std::vector<nodeInfo> &nodes, std::string &base_conf, s
             break;
         case SPEEDTEST_MESSAGE_FOUNDSOCKS:
             proxy = "socks5, " + hostname + ", " + port + ", " + username + ", " + password;
-            if(ext.skip_cert_verify)
+            if(scv)
                 proxy += ", skip-cert-verify=1";
             break;
         case SPEEDTEST_MESSAGE_FOUNDHTTP:
             proxy = "http, " + hostname + ", " + port + ", " + username + ", " + password;
             proxy += std::string(", tls=") + (type == "HTTPS" ? "true" : "false");
-            if(ext.skip_cert_verify)
+            if(scv)
                 proxy += ", skip-cert-verify=1";
             break;
         case SPEEDTEST_MESSAGE_FOUNDTROJAN:
@@ -1271,16 +1465,23 @@ std::string netchToSurge(std::vector<nodeInfo> &nodes, std::string &base_conf, s
             proxy = "trojan, " + hostname + ", " + port + ", password=" + password;
             if(host.size())
                 proxy += ", sni=" + host;
-            if(ext.skip_cert_verify)
+            if(scv)
                 proxy += ", skip-cert-verify=1";
+            break;
+        case SPEEDTEST_MESSAGE_FOUNDSNELL:
+            obfs = GetMember(json, "OBFS");
+            host = GetMember(json, "Host");
+            proxy = "snell, " + hostname + ", " + port + ", psk=" + password;
+            if(obfs.size())
+                proxy += ", obfs=" + obfs + ", obfs-host=" + host;
             break;
         default:
             continue;
         }
 
-        if(ext.tfo)
+        if(tfo)
             proxy += ", tfo=true";
-        if(ext.udp)
+        if(udp)
             proxy += ", udp-relay=true";
 
         remarks_list.emplace_back(remark);
@@ -1431,40 +1632,34 @@ std::string netchToSS(std::vector<nodeInfo> &nodes, extra_settings &ext)
 
 std::string netchToSSSub(std::string &base_conf, std::vector<nodeInfo> &nodes, extra_settings &ext)
 {
-    rapidjson::Document json;
-    rapidjson::StringBuffer sb;
-    rapidjson::Writer<rapidjson::StringBuffer> writer(sb);
+    rapidjson::Document json, base;
     std::string remark, hostname, password, method;
     std::string plugin, pluginopts;
     std::string protocol, obfs;
-    std::string route, remote_dns, ipv6, metered, proxy_apps_enabled, bypass, udpdns;
-    string_array android_list;
+    std::string output_content;
     int port;
 
-    json.Parse(base_conf.data());
-    if(!json.HasParseError())
+    rapidjson::Document::AllocatorType &alloc = json.GetAllocator();
+    json.SetObject();
+    json.AddMember("remarks", "", alloc);
+    json.AddMember("server", "", alloc);
+    json.AddMember("server_port", 0, alloc);
+    json.AddMember("method", "", alloc);
+    json.AddMember("password", "", alloc);
+    json.AddMember("plugin", "", alloc);
+    json.AddMember("plugin_opts", "", alloc);
+
+    base.Parse(base_conf.data());
+    if(!base.HasParseError())
     {
-        route = GetMember(json, "route");
-        remote_dns = GetMember(json, "remote_dns");
-        ipv6 = GetMember(json, "ipv6");
-        metered = GetMember(json, "metered");
-        udpdns = GetMember(json, "udpdns");
-        if(json.HasMember("proxy_apps") && json["proxy_apps"].IsObject())
-        {
-            proxy_apps_enabled = GetMember(json["proxy_apps"], "enabled");
-            bypass = GetMember(json["proxy_apps"], "bypass");
-            if(json["proxy_apps"].HasMember("android_list") && json["proxy_apps"]["android_list"].IsArray())
-            {
-                for(size_t i = 0; i < json["proxy_apps"]["android_list"].Size(); i++)
-                {
-                    if(json["proxy_apps"]["android_list"][i].IsString())
-                        android_list.push_back(json["proxy_apps"]["android_list"][i].GetString());
-                }
-            }
-        }
+        for(auto iter = base.MemberBegin(); iter != base.MemberEnd(); iter++)
+            json.AddMember(iter->name, iter->value, alloc);
     }
 
-    writer.StartArray();
+    rapidjson::Value jsondata;
+    jsondata = json.Move();
+
+    output_content = "[";
     for(nodeInfo &x : nodes)
     {
         json.Parse(x.proxyStr.data());
@@ -1492,75 +1687,19 @@ std::string netchToSSSub(std::string &base_conf, std::vector<nodeInfo> &nodes, e
         default:
             continue;
         }
-        writer.StartObject();
-        writer.Key("server");
-        writer.String(hostname.data());
-        writer.Key("server_port");
-        writer.Int(port);
-        writer.Key("method");
-        writer.String(method.data());
-        writer.Key("password");
-        writer.String(password.data());
-        writer.Key("remarks");
-        writer.String(remark.data());
-        writer.Key("plugin");
-        writer.String(plugin.data());
-        writer.Key("plugin_opts");
-        writer.String(pluginopts.data());
-        if(route.size())
-        {
-            writer.Key("route");
-            writer.String(route.data());
-        }
-        if(remote_dns.size())
-        {
-            writer.Key("remote_dns");
-            writer.Bool(remote_dns == "true");
-        }
-        if(ipv6.size())
-        {
-            writer.Key("ipv6");
-            writer.Bool(ipv6 == "true");
-        }
-        if(metered.size())
-        {
-            writer.Key("metered");
-            writer.Bool(metered == "true");
-        }
-        if(udpdns.size())
-        {
-            writer.Key("udpdns");
-            writer.Bool(udpdns == "true");
-        }
-        if(proxy_apps_enabled.size())
-        {
-            bool enabled = proxy_apps_enabled == "true";
-            writer.Key("proxy_apps");
-            writer.StartObject();
-            writer.Key("enabled");
-            writer.Bool(enabled);
-            if(enabled)
-            {
-                if(bypass.size())
-                {
-                    writer.Key("bypass");
-                    writer.Bool(bypass == "true");
-                }
-            }
-            if(android_list.size())
-            {
-                writer.Key("android_list");
-                writer.StartArray();
-                for(const std::string &x : android_list)
-                    writer.String(x.data());
-                writer.EndArray();
-            }
-            writer.EndObject();
-        }
-        writer.EndObject();
+        jsondata["remarks"].SetString(rapidjson::StringRef(remark.c_str(), remark.size()));
+        jsondata["server"].SetString(rapidjson::StringRef(hostname.c_str(), hostname.size()));
+        jsondata["server_port"] = port;
+        jsondata["password"].SetString(rapidjson::StringRef(password.c_str(), password.size()));
+        jsondata["method"].SetString(rapidjson::StringRef(method.c_str(), method.size()));
+        jsondata["plugin"].SetString(rapidjson::StringRef(plugin.c_str(), plugin.size()));
+        jsondata["plugin_opts"].SetString(rapidjson::StringRef(pluginopts.c_str(), pluginopts.size()));
+        output_content += SerializeObject(jsondata) + ",";
     }
-    writer.EndArray();
-    return sb.GetString();
+    if(output_content.size() > 1)
+        output_content.erase(output_content.size() - 1);
+    output_content += "]";
+    return output_content;
 }
 
 std::string netchToSSR(std::vector<nodeInfo> &nodes, extra_settings &ext)
@@ -1719,10 +1858,7 @@ void netchToQuan(std::vector<nodeInfo> &nodes, INIReader &ini, std::vector<rules
         if(ext.append_proxy_type)
             x.remarks = "[" + type + "] " + x.remarks;
 
-        while(std::count(remarks_list.begin(), remarks_list.end(), x.remarks) > 0)
-            x.remarks += "$";
-
-        remark = x.remarks;
+        processRemark(x.remarks, remark, remarks_list);
 
         hostname = GetMember(json, "Hostname");
         port = std::to_string((unsigned short)stoi(GetMember(json, "Port")));
@@ -1900,6 +2036,27 @@ void netchToQuan(std::vector<nodeInfo> &nodes, INIReader &ini, std::vector<rules
                 continue;
             rules_upper_bound -= 2;
             break;
+        case "ssid"_hash:
+            {
+                if(rules_upper_bound < 4)
+                    continue;
+                singlegroup = vArray[0] + " : wifi = " + vArray[2];
+                std::string content, celluar, celluar_matcher = R"(^(.*?),?celluar\s?=\s?(.*?)(,.*)$)", rem_a, rem_b;
+                for(auto iter = vArray.begin() + 3; iter != vArray.end(); iter++)
+                {
+                    if(regGetMatch(*iter, celluar_matcher, 4, NULL, &rem_a, &celluar, &rem_b))
+                    {
+                        content += *iter + "\n";
+                        continue;
+                    }
+                    content += rem_a + rem_b + "\n";
+                }
+                if(celluar.size())
+                    singlegroup += ", celluar = " + celluar;
+                singlegroup += "\n" + replace_all_distinct(trim_of(content, ','), ",", "\n");
+                ini.Set("{NONAME}", base64_encode(singlegroup)); //insert order
+            }
+            continue;
         default:
             continue;
         }
@@ -1970,6 +2127,7 @@ void netchToQuanX(std::vector<nodeInfo> &nodes, INIReader &ini, std::vector<rule
     std::string id, transproto, host, path;
     std::string protocol, protoparam, obfs, obfsparam;
     std::string proxyStr;
+    tribool udp, tfo, scv;
     bool tlssecure;
     std::vector<nodeInfo> nodelist;
     string_array remarks_list;
@@ -1984,14 +2142,18 @@ void netchToQuanX(std::vector<nodeInfo> &nodes, INIReader &ini, std::vector<rule
         if(ext.append_proxy_type)
             x.remarks = "[" + type + "] " + x.remarks;
 
-        while(std::count(remarks_list.begin(), remarks_list.end(), x.remarks) > 0)
-            x.remarks += "$";
-
-        remark = x.remarks;
+        processRemark(x.remarks, remark, remarks_list);
 
         hostname = GetMember(json, "Hostname");
         port = std::to_string((unsigned short)stoi(GetMember(json, "Port")));
         method = GetMember(json, "EncryptMethod");
+
+        udp = ext.udp;
+        tfo = ext.tfo;
+        scv = ext.skip_cert_verify;
+        udp.define(GetMember(json, "EnableUDP"));
+        tfo.define(GetMember(json, "EnableTFO"));
+        scv.define(GetMember(json, "AllowInsecure"));
 
         switch(x.linkType)
         {
@@ -2059,10 +2221,12 @@ void netchToQuanX(std::vector<nodeInfo> &nodes, INIReader &ini, std::vector<rule
         default:
             continue;
         }
-        if(ext.tfo)
+        if(tfo)
             proxyStr += ", fast-open=true";
-        if(ext.udp)
+        if(udp)
             proxyStr += ", udp-relay=true";
+        if(scv && (x.linkType == SPEEDTEST_MESSAGE_FOUNDHTTP || x.linkType == SPEEDTEST_MESSAGE_FOUNDTROJAN))
+            proxyStr += ", tls-verification=false";
         proxyStr += ", tag=" + remark;
 
         ini.Set("{NONAME}", proxyStr);
@@ -2110,20 +2274,30 @@ void netchToQuanX(std::vector<nodeInfo> &nodes, INIReader &ini, std::vector<rule
                 continue;
             rules_upper_bound -= 2;
             break;
+        case "ssid"_hash:
+            if(rules_upper_bound < 4)
+                continue;
+            type = "ssid";
+            for(auto iter = vArray.begin() + 2; iter != vArray.end(); iter++)
+                filtered_nodelist.emplace_back(replace_all_distinct(*iter, "=", ":"));
+            break;
         default:
             continue;
         }
 
         name = vArray[0];
 
-        for(unsigned int i = 2; i < rules_upper_bound; i++)
-            groupGenerate(vArray[i], nodelist, filtered_nodelist, true);
+        if(hash_(vArray[1]) != "ssid"_hash)
+        {
+            for(unsigned int i = 2; i < rules_upper_bound; i++)
+                groupGenerate(vArray[i], nodelist, filtered_nodelist, true);
 
-        if(!filtered_nodelist.size())
-            filtered_nodelist.emplace_back("direct");
+            if(!filtered_nodelist.size())
+                filtered_nodelist.emplace_back("direct");
 
-        if(filtered_nodelist.size() < 2) // force groups with 1 node to be static
-            type = "static";
+            if(filtered_nodelist.size() < 2) // force groups with 1 node to be static
+                type = "static";
+        }
 
         auto iter = std::find_if(original_groups.begin(), original_groups.end(), [name](const string_multimap::value_type &n)
         {
@@ -2361,10 +2535,9 @@ void netchToMellow(std::vector<nodeInfo> &nodes, INIReader &ini, std::vector<rul
 
         if(ext.append_proxy_type)
             x.remarks = "[" + type + "] " + x.remarks;
-        remark = x.remarks;
 
-        while(std::count(remarks_list.begin(), remarks_list.end(), remark) > 0)
-            remark = x.remarks = x.remarks + "$";
+        processRemark(x.remarks, remark, remarks_list);
+
         hostname = GetMember(json, "Hostname");
         port = std::to_string((unsigned short)stoi(GetMember(json, "Port")));
         username = GetMember(json, "Username");
@@ -2491,6 +2664,7 @@ std::string netchToLoon(std::vector<nodeInfo> &nodes, std::string &base_conf, st
     std::string protocol, protoparam, obfs, obfsparam;
     std::string id, aid, transproto, faketype, host, edge, path, quicsecure, quicsecret;
     std::string output_nodelist;
+    tribool scv;
     std::vector<nodeInfo> nodelist;
     bool tlssecure;
     //group pref
@@ -2514,17 +2688,18 @@ std::string netchToLoon(std::vector<nodeInfo> &nodes, std::string &base_conf, st
 
         if(ext.append_proxy_type)
             x.remarks = "[" + type + "] " + x.remarks;
-        remark = x.remarks;
 
-        while(std::count(remarks_list.begin(), remarks_list.end(), x.remarks) > 0)
-            x.remarks += "$";
+        processRemark(x.remarks, remark, remarks_list);
 
-        remark = x.remarks;
         hostname = GetMember(json, "Hostname");
         port = std::to_string((unsigned short)stoi(GetMember(json, "Port")));
         username = GetMember(json, "Username");
         password = GetMember(json, "Password");
         method = GetMember(json, "EncryptMethod");
+
+        scv = GetMember(json, "AllowInsecure");
+        scv.define(ext.skip_cert_verify);
+
         proxy.clear();
 
         switch(x.linkType)
@@ -2567,7 +2742,7 @@ std::string netchToLoon(std::vector<nodeInfo> &nodes, std::string &base_conf, st
             default:
                 continue;
             }
-            if(ext.skip_cert_verify)
+            if(scv)
                 proxy += ",skip-cert-verify:1";
             break;
         case SPEEDTEST_MESSAGE_FOUNDSSR:

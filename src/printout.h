@@ -28,10 +28,12 @@ enum
 
 enum
 {
-    SPEEDTEST_MESSAGE_WELCOME = 1,
-    SPEEDTEST_MESSAGE_FOUNDVMESS,
+    SPEEDTEST_MESSAGE_FOUNDVMESS = 1,
     SPEEDTEST_MESSAGE_FOUNDSS,
     SPEEDTEST_MESSAGE_FOUNDSSR,
+    SPEEDTEST_MESSAGE_FOUNDTROJAN,
+    SPEEDTEST_MESSAGE_FOUNDSNELL,
+    SPEEDTEST_MESSAGE_WELCOME,
     SPEEDTEST_MESSAGE_FOUNDSUB,
     SPEEDTEST_MESSAGE_GOTSERVER,
     SPEEDTEST_MESSAGE_STARTPING,
@@ -63,7 +65,6 @@ enum
     SPEEDTEST_MESSAGE_FOUNDSSTAP,
     SPEEDTEST_MESSAGE_FOUNDNETCH,
     SPEEDTEST_MESSAGE_FOUNDHTTP,
-    SPEEDTEST_MESSAGE_FOUNDTROJAN,
     SPEEDTEST_MESSAGE_EOF
 };
 
@@ -73,8 +74,9 @@ enum
 #define SOCKS_DEFAULT_GROUP "SocksProvider"
 #define HTTP_DEFAULT_GROUP "HTTPProvider"
 #define TROJAN_DEFAULT_GROUP "TrojanProvider"
+#define SNELL_DEFAULT_GROUP "SnellProvider"
 
-void printMsg(int index, nodeInfo *node, bool rpcmode);
+void printMsg(int index, nodeInfo &node, bool rpcmode);
 void printMsgWithDict(int index, bool rpcmode, std::vector<std::string> dict, std::vector<std::string> trans);
 void printMsgDirect(int index, bool rpcmode);
 

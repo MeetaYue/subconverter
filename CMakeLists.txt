@@ -14,7 +14,8 @@ ELSE()
     ADD_COMPILE_OPTIONS(/W4)
 ENDIF()
 
-OPTION(USING_STD_REGEX "Use std::regex from C++ library instead of PCRE2." OFF)
+#remove std::regex support since it is not compatible with group modifiers and slow
+#OPTION(USING_STD_REGEX "Use std::regex from C++ library instead of PCRE2." OFF)
 OPTION(USING_MALLOC_TRIM "Call malloc_trim after processing request to lower memory usage (Your system must support malloc_trim)." OFF)
 OPTION(USING_MBEDTLS "Use mbedTLS instead of OpenSSL for MD5 calculation." OFF)
 
@@ -44,7 +45,6 @@ ADD_EXECUTABLE(subconverter
     src/misc.cpp
     src/multithread.cpp
     src/nodemanip.cpp
-    src/rapidjson_extra.cpp
     src/speedtestutil.cpp
     src/subexport.cpp
     src/templates.cpp
@@ -92,14 +92,14 @@ LINK_DIRECTORIES(${YAML_CPP_LIBRARY_DIRS})
 INCLUDE_DIRECTORIES(${YAML_CPP_INCLUDE_DIRS})
 TARGET_LINK_LIBRARIES(subconverter ${YAML_CPP_LIBRARY})
 
-IF(USING_STD_REGEX STREQUAL "ON")
-    ADD_DEFINITIONS(-DUSE_STD_REGEX)
-ELSE()
+#IF(USING_STD_REGEX STREQUAL "ON")
+#    ADD_DEFINITIONS(-DUSE_STD_REGEX)
+#ELSE()
     FIND_PACKAGE(PCRE2 REQUIRED)
     INCLUDE_DIRECTORIES(${PCRE2_INCLUDE_DIRS})
     TARGET_LINK_LIBRARIES(subconverter ${PCRE2_LIBRARY})
     ADD_DEFINITIONS(-DPCRE2_STATIC)
-ENDIF()
+#ENDIF()
 
 IF(WIN32)
     TARGET_LINK_LIBRARIES(subconverter wsock32 ws2_32)
