@@ -14,18 +14,25 @@ DOMAIN,ip.bjango.com
 DOMAIN-SUFFIX,alphassl.com
 DOMAIN-SUFFIX,edu.cn
 
-# > Sony
+# > RRYS
+DOMAIN-SUFFIX,p4pfile.com
+DOMAIN-SUFFIX,zmzfile.com
+
+# > Sony PSX
 USER-AGENT,RemotePlay*
 
 # > TeamViewer
-IP-CIDR,185.188.32.0/24,no-resolve
-IP-CIDR,185.188.33.0/24,no-resolve
-IP-CIDR,185.188.34.0/24,no-resolve
-IP-CIDR,185.188.35.0/24,no-resolve
-IP-CIDR6,2a0b:b580::/48,no-resolve
-IP-CIDR6,2a0b:b581::/48,no-resolve
-IP-CIDR6,2a0b:b582::/48,no-resolve
-IP-CIDR6,2a0b:b583::/48,no-resolve
+IP-CIDR,185.188.32.0/24
+IP-CIDR,185.188.33.0/24
+IP-CIDR,185.188.34.0/24
+IP-CIDR,185.188.35.0/24
+IP-CIDR6,2a0b:b580::/48
+IP-CIDR6,2a0b:b581::/48
+IP-CIDR6,2a0b:b582::/48
+IP-CIDR6,2a0b:b583::/48
+
+# > Tencent
+IP-CIDR,182.254.116.0/24
 
 DOMAIN-SUFFIX,12306.cn
 DOMAIN-SUFFIX,12306.com
@@ -53,7 +60,6 @@ DOMAIN-SUFFIX,alipayobjects.com
 DOMAIN-SUFFIX,aliyun.com
 DOMAIN-SUFFIX,aliyuncs.com
 DOMAIN-SUFFIX,amap.com
-DOMAIN-SUFFIX,apache.org
 DOMAIN-SUFFIX,api.crisp.chat
 DOMAIN-SUFFIX,appshike.com
 DOMAIN-SUFFIX,appstore.com
@@ -62,7 +68,6 @@ DOMAIN-SUFFIX,aweme.snssdk.com
 DOMAIN-SUFFIX,bababian.com
 DOMAIN-SUFFIX,baidu.com
 DOMAIN-SUFFIX,baidupcs.com
-DOMAIN-SUFFIX,battle.net
 DOMAIN-SUFFIX,bdimg.com
 DOMAIN-SUFFIX,bdstatic.com
 DOMAIN-SUFFIX,beatsbydre.com
@@ -152,6 +157,8 @@ DOMAIN-SUFFIX,luoo.net
 DOMAIN-SUFFIX,lxdns.com
 DOMAIN-SUFFIX,mai.tn
 DOMAIN-SUFFIX,meizu.com
+DOMAIN-SUFFIX,metatrader4.com
+DOMAIN-SUFFIX,metatrader5.com
 DOMAIN-SUFFIX,mi.com
 DOMAIN-SUFFIX,miaopai.com
 DOMAIN-SUFFIX,miui.com
@@ -270,7 +277,7 @@ DOMAIN-SUFFIX,zhimg.com
 DOMAIN-SUFFIX,zimuzu.tv
 DOMAIN-SUFFIX,zmz002.com
 
-IP-CIDR,1.255.62.0/24,no-resolve
+IP-CIDR,1.255.62.0/24
 
 # > CN
 DOMAIN-SUFFIX,cn

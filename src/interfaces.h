@@ -10,9 +10,10 @@
 
 void refreshRulesets(string_array &ruleset_list, std::vector<ruleset_content> &rca);
 void readConf();
-void generateBase();
 int simpleGenerator();
+std::string convertRuleset(const std::string &content, int type);
 
+std::string getConvertedRuleset(RESPONSE_CALLBACK_ARGS);
 std::string getScript(RESPONSE_CALLBACK_ARGS);
 std::string getProfile(RESPONSE_CALLBACK_ARGS);
 std::string getRuleset(RESPONSE_CALLBACK_ARGS);

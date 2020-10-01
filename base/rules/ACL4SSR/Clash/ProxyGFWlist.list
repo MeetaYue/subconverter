@@ -6,6 +6,7 @@ DOMAIN-SUFFIX,bit.no.com
 DOMAIN-SUFFIX,btlibrary.me
 DOMAIN-SUFFIX,cccat.io
 DOMAIN-SUFFIX,cloudcone.com
+DOMAIN-SUFFIX,dubox.com
 DOMAIN-SUFFIX,gameloft.com
 DOMAIN-SUFFIX,inoreader.com
 DOMAIN-SUFFIX,ip138.com
@@ -233,7 +234,6 @@ DOMAIN-SUFFIX,akademiye.org
 DOMAIN-SUFFIX,akamai.net
 DOMAIN-SUFFIX,akamaihd.net
 DOMAIN-SUFFIX,akamaistream.net
-DOMAIN-SUFFIX,akamaized.net
 DOMAIN-SUFFIX,akiba-online.com
 DOMAIN-SUFFIX,akiba-web.com
 DOMAIN-SUFFIX,akow.org
@@ -2949,7 +2949,6 @@ DOMAIN-SUFFIX,lvv2.com
 DOMAIN-SUFFIX,lyfhk.net
 DOMAIN-SUFFIX,lzmtnews.org
 DOMAIN-SUFFIX,m-sport.co.uk
-DOMAIN-SUFFIX,m-team.cc
 DOMAIN-SUFFIX,m.me
 DOMAIN-SUFFIX,macgamestore.com
 DOMAIN-SUFFIX,macrovpn.com
@@ -4478,6 +4477,7 @@ DOMAIN-SUFFIX,tenacy.com
 DOMAIN-SUFFIX,tensorflow.org
 DOMAIN-SUFFIX,tenzinpalmo.com
 DOMAIN-SUFFIX,tew.org
+DOMAIN-SUFFIX,textnow.com
 DOMAIN-SUFFIX,textnow.me
 DOMAIN-SUFFIX,tfhub.dev
 DOMAIN-SUFFIX,thaicn.com
@@ -5576,6 +5576,8 @@ DOMAIN-SUFFIX,spring.net
 DOMAIN-SUFFIX,stackoverflow.com
 
 # Discord
+DOMAIN-SUFFIX,discord.co
+DOMAIN-SUFFIX,discord.com
 DOMAIN-SUFFIX,discord.gg
 DOMAIN-SUFFIX,discord.media
 DOMAIN-SUFFIX,discordapp.com
@@ -5688,6 +5690,10 @@ DOMAIN-SUFFIX,bongacams.com
 DOMAIN-SUFFIX,chaturbate.com
 DOMAIN-SUFFIX,dditscdn.com
 DOMAIN-SUFFIX,livejasmin.com
+DOMAIN-SUFFIX,phncdn.com
+DOMAIN-SUFFIX,phprcdn.com
+DOMAIN-SUFFIX,pornhub.com
+DOMAIN-SUFFIX,pornhubpremium.com
 DOMAIN-SUFFIX,rdtcdn.com
 DOMAIN-SUFFIX,redtube.com
 DOMAIN-SUFFIX,sb-cd.com
@@ -5707,6 +5713,7 @@ DOMAIN-SUFFIX,pximg.net
 # Steam
 DOMAIN-SUFFIX,fanatical.com
 DOMAIN-SUFFIX,humblebundle.com
+DOMAIN-SUFFIX,steam-chat.com
 DOMAIN-SUFFIX,steamcommunity.com
 DOMAIN-SUFFIX,steampowered.com
 DOMAIN-SUFFIX,steamstatic.com
@@ -5715,7 +5722,7 @@ DOMAIN-SUFFIX,steamstatic.com
 DOMAIN-SUFFIX,twitch.tv
 DOMAIN-SUFFIX,ttvnw.net
 DOMAIN-SUFFIX,jtvnw.net
-DOMAIN-SUFFIX,akamaized.net
+DOMAIN-KEYWORD,ttvnw
 
 # Twitter
 DOMAIN-SUFFIX,t.co
@@ -5729,6 +5736,7 @@ DOMAIN-SUFFIX,tdesktop.com
 DOMAIN-SUFFIX,telegra.ph
 DOMAIN-SUFFIX,telegram.me
 DOMAIN-SUFFIX,telegram.org
+DOMAIN-SUFFIX,telesco.pe
 IP-CIDR,91.108.0.0/16,no-resolve
 IP-CIDR,109.239.140.0/24,no-resolve
 IP-CIDR,149.154.160.0/20,no-resolve
@@ -5752,6 +5760,20 @@ IP-CIDR,184.173.128.0/17,no-resolve
 IP-CIDR,158.85.224.160/27,no-resolve
 IP-CIDR,75.126.150.0/16,no-resolve
 IP-CIDR,69.171.235.0/16,no-resolve
+
+# Wikipedia 维基相关域名
+DOMAIN-SUFFIX,mediawiki.org
+DOMAIN-SUFFIX,wikibooks.org
+DOMAIN-SUFFIX,wikidata.org
+DOMAIN-SUFFIX,wikileaks.org
+DOMAIN-SUFFIX,wikimedia.org
+DOMAIN-SUFFIX,wikinews.org
+DOMAIN-SUFFIX,wikipedia.org
+DOMAIN-SUFFIX,wikiquote.org
+DOMAIN-SUFFIX,wikisource.org
+DOMAIN-SUFFIX,wikiversity.org
+DOMAIN-SUFFIX,wikivoyage.org
+DOMAIN-SUFFIX,wiktionary.org
 
 #飞流直播
 DOMAIN-SUFFIX,neulion.com
